@@ -95,6 +95,45 @@ h2{font-size:20px;margin:26px 0 12px}
  .mobbar{display:flex;position:fixed;left:10px;right:10px;bottom:10px;z-index:9;background:var(--acc);color:var(--accink);border-radius:14px;padding:12px 16px;align-items:center;gap:10px;border:0;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.25)}
  .mobbar .m{flex:1;height:8px;border-radius:9px;background:rgba(255,255,255,.3);overflow:hidden}.mobbar .m i{display:block;height:100%;background:currentColor}
 }
+
+/* phone layout */
+.srow{margin-top:8px;flex-wrap:nowrap}.fbtn{display:none;flex:none}
+.fbtn span{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:99px;background:var(--hot);color:#fff;font-size:12px;margin-left:6px;padding:0 5px}
+.fbtn span:empty{display:none}
+.more{margin-top:6px}.more .row{margin-top:6px}
+.scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9}
+.vn{display:none;font-size:12px;color:var(--mute);font-weight:600}
+@media(max-width:700px){
+ .top{padding:14px 16px 12px}.top h1{font-size:24px}
+ .wrap{padding:0 12px 110px;gap:0}
+ .bar{margin:0 -12px;padding:8px 12px;box-shadow:0 6px 12px -10px rgba(0,0,0,.35)}
+ .pill{padding:6px 12px;font-size:14px;min-height:36px}
+ .fbtn{display:inline-flex;align-items:center}
+ .more{display:none;padding:8px 0 2px}.more.open{display:block}
+ .frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .frow label.l{display:grid;gap:2px;font-size:12px;color:var(--mute);white-space:normal}
+ .frow label.l .in{width:100%}
+ .frow label.l:last-child{grid-column:1/-1;display:flex;font-size:14px;color:var(--ink)}
+ h2{font-size:17px;margin:18px 0 8px}
+ .grid{grid-template-columns:minmax(0,1fr);gap:10px}
+ .it{flex-direction:row;border-radius:12px}
+ .im{flex:none;width:104px;aspect-ratio:auto;min-height:104px}
+ .im .tag{display:none}.vn{display:block}
+ .bd{padding:8px 10px;gap:4px}
+ .nm{font-size:14px}
+ .ds{-webkit-line-clamp:2;font-size:12px}
+ .meta{gap:4px}.b{font-size:12px;padding:2px 6px}.pr{font-size:14px}
+ .add{min-height:36px;padding:6px 16px;font-size:14px;margin-top:4px;align-self:flex-end}
+ .scrim.on{display:block}
+ .mobbar{bottom:max(10px,env(safe-area-inset-bottom))}
+ .tray{padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
+ .tray::before{content:"";display:block;width:40px;height:4px;border-radius:9px;background:var(--line);margin:-4px auto 10px}
+ .big b{font-size:42px}
+ .ti{grid-template-columns:48px minmax(0,1fr) 40px}
+ .ti select{font-size:14px;padding:4px 6px;min-height:32px}
+ .ti .x{width:40px;height:40px}
+ .toast{bottom:84px;max-width:90vw;text-align:center}
+}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -107,13 +146,18 @@ h2{font-size:20px;margin:26px 0 12px}
 <section>
  <div class="bar">
   <div class="pills" id="meals"></div>
-  <div class="pills" id="venues" style="margin-top:6px"></div>
-  <div class="row" style="margin-top:6px">
-   <input class="in q" type="search" id="q" placeholder="ძებნა: ქათამი, ორაგული, ბოული…" aria-label="ძებნა">
+  <div class="row srow">
+   <input class="in q" type="search" id="q" placeholder="ძებნა: ქათამი, ბოული…" aria-label="ძებნა">
+   <button class="btn fbtn" id="fbtn" aria-expanded="false" aria-controls="more">ფილტრები<span id="fcnt"></span></button>
+  </div>
+  <div class="more" id="more">
+   <div class="pills" id="venues"></div>
+   <div class="row frow">
    <label class="l">კკალ ≤ <select class="in" id="mk"><option value="">ყველა</option><option>250</option><option>350</option><option>450</option><option>550</option><option>650</option></select></label>
    <label class="l">ცილა ≥ <select class="in" id="mp"><option value="">ნებისმიერი</option><option>15</option><option>20</option><option>30</option><option>40</option></select></label>
    <label class="l">დალაგება <select class="in" id="so"><option value="">ობიექტით</option><option value="k">კალორია ↑</option><option value="p">ცილა ↓</option><option value="r">ცილა/კკალ ↓</option><option value="u">ფასი ↑</option></select></label>
    <label class="l"><input type="checkbox" id="fit"> მხოლოდ ის, რაც დარჩენილში ეტევა</label>
+   </div>
   </div>
  </div>
  <div id="list"><p class="empty">მენიუ იტვირთება…</p></div>
@@ -144,6 +188,7 @@ h2{font-size:20px;margin:26px 0 12px}
  </div>
 </aside>
 </div>
+<div class="scrim" id="scrim"></div>
 <button class="mobbar" id="mobbar"><span id="mbk">0 / 1500</span><span class="m"><i id="mbi" style="width:0"></i></span><span>დეტალურად ▴</span></button>
 <div class="toast" id="toast" role="status"></div>
 
@@ -165,11 +210,12 @@ function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clear
 const tot=()=>{let k=0,p=0,u=0,unk=0;for(const t of tray){const x=I[t.i];if(!x)continue;if(x.k==null)unk++;else k+=x.k;p+=x.p||0;u+=x.gel}return{k,p,u,unk}};
 
 function card(x,idx){
- return '<div class="it"><div class="im">'+(x.img?'<img loading="lazy" src="'+x.img+'" alt="">':'<div class="ph">ფოტო არ არის</div>')+'<span class="tag">'+esc(x.v)+'</span></div><div class="bd"><div class="nm">'+esc(x.n)+'</div>'+(x.d?'<div class="ds">'+esc(x.d)+'</div>':'')+
+ return '<div class="it"><div class="im">'+(x.img?'<img loading="lazy" src="'+x.img+'" alt="">':'<div class="ph">ფოტო არ არის</div>')+'<span class="tag">'+esc(x.v)+'</span></div><div class="bd"><div class="vn">'+esc(x.v)+'</div><div class="nm">'+esc(x.n)+'</div>'+(x.d?'<div class="ds">'+esc(x.d)+'</div>':'')+
  '<div class="meta">'+(x.k!=null?'<span class="b k">'+x.k+' კკალ</span>':'<span class="b">კკალ ?</span>')+(x.p!=null?'<span class="b">ცილა '+x.p+'გ</span>':'')+'<span class="pr">'+x.gel.toFixed(2)+' ₾</span></div>'+
  '<button class="add" data-add="'+idx+'">დამატება</button></div></div>';
 }
 function drawList(){
+ {const n=(on.size<VN.length?1:0)+($('mk').value?1:0)+($('mp').value?1:0)+($('so').value?1:0)+($('fit').checked?1:0);$('fcnt').textContent=n||''}
  const q=$('q').value.trim().toLowerCase(),mk=+$('mk').value||0,mp=+$('mp').value||0,so=$('so').value,fit=$('fit').checked,rem=target-tot().k;
  $('meals').innerHTML=MEALS.map(([k,l])=>'<button class="pill'+(k===meal?' on':'')+'" data-meal="'+k+'">'+l+' <small>('+I.filter(x=>on.has(x.v)&&(!k||x.m===k)).length+')</small></button>').join('');
  $('venues').innerHTML=VN.map(v=>'<button class="pill sm'+(on.has(v)?'':' off')+'" data-ven="'+esc(v)+'">'+esc(v)+'</button>').join('');
@@ -219,11 +265,12 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.mv!=null){tray[+t.dataset.mv].s=t.value;drawTray()}});
 ['q','mk','mp','so','fit'].forEach(id=>$(id).addEventListener('input',drawList));
+$('fbtn').onclick=()=>{const o=$('more').classList.toggle('open');$('fbtn').setAttribute('aria-expanded',o)};
 $('target').addEventListener('change',()=>{target=Math.max(800,Math.min(4000,+$('target').value||1500));$('target').value=target;store.set('target',target);drawTray();drawList()});
 $('suggest').onclick=suggest;
 $('clear').onclick=()=>{tray=[];drawTray();drawList()};
 const mq=matchMedia('(max-width:900px)');const syncClose=()=>{$('closeTray').style.display=mq.matches?'':'none'};syncClose();mq.addEventListener('change',syncClose);
-$('mobbar').onclick=()=>$('tray').classList.add('open');$('closeTray').onclick=()=>$('tray').classList.remove('open');
+const sheet=o=>{$('tray').classList.toggle('open',o);$('scrim').classList.toggle('on',o)};$('mobbar').onclick=()=>sheet(true);$('closeTray').onclick=()=>sheet(false);$('scrim').onclick=()=>sheet(false);
 
 // plans: share by link + saved on this device
 const ID=x=>{let h=2166136261;const s=KEY(x);for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)};
@@ -238,7 +285,7 @@ $('pshare').onclick=async()=>{if(!tray.length){toast('ჯერ დაამა�
 let plans=store.get('plans',[]);
 function drawPlans(){$('dbnote').textContent=plans.length?'ეს გეგმები მხოლოდ ამ მოწყობილობაზე ინახება.':'შენახული გეგმა ჯერ არ გაქვს.';
  $('plans').innerHTML=plans.map((d,j)=>'<div class="plan"><div class="t"><b>'+esc(d.name)+'</b><small>'+esc(+d.k||0)+' კკალ · ცილა '+esc(+d.p||0)+'გ · '+esc((+d.u||0).toFixed(2))+' ₾ · '+new Date(+d.at||0).toLocaleDateString('ka-GE')+'</small></div><button class="btn" data-load="'+j+'">გახსნა</button><button class="btn h" data-del="'+j+'">წაშლა</button></div>').join('')}
-function loadPlan(j){const d=plans[+j];if(!d)return;applyPlan(decodePlan(d.code),'გეგმა ჩაიტვირთა');$('pname').value=d.name||'';$('tray').classList.add('open')}
+function loadPlan(j){const d=plans[+j];if(!d)return;applyPlan(decodePlan(d.code),'გეგმა ჩაიტვირთა');$('pname').value=d.name||'';sheet(true)}
 function delPlan(j){const b=$('plans').querySelector('[data-del="'+(+j)+'"]');if(b&&b.dataset.sure!=='1'){b.dataset.sure='1';b.textContent='დარწმუნებული ხარ?';setTimeout(()=>{if(b.isConnected){b.dataset.sure='';b.textContent='წაშლა'}},3000);return}plans.splice(+j,1);store.set('plans',plans);drawPlans();toast('წაიშალა')}
 $('psave').onclick=()=>{if(!tray.length){toast('უჯრა ცარიელია');return}const t=tot(),name=($('pname').value.trim()||'გეგმა').slice(0,60);const i=plans.findIndex(d=>d.name===name);const d={name,code:encodePlan(),k:t.k,p:t.p,u:+t.u.toFixed(2),at:Date.now()};if(i>=0)plans[i]=d;else plans.unshift(d);store.set('plans',plans);drawPlans();toast(i>=0?'გეგმა განახლდა':'გეგმა შეინახა')};
 drawPlans();
