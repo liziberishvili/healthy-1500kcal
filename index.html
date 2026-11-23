@@ -126,7 +126,12 @@ h2{font-size:20px;margin:26px 0 12px}
  .meta{gap:4px}.b{font-size:12px;padding:2px 6px}.pr{font-size:14px}
  .add{min-height:36px;padding:6px 16px;font-size:14px;margin-top:4px;align-self:flex-end}
  .scrim.on{display:block}
- .mobbar{bottom:max(10px,env(safe-area-inset-bottom))}
+ .mobbar{bottom:max(10px,env(safe-area-inset-bottom));padding:10px 14px;gap:12px;text-align:left}
+ #mbk{display:flex;flex-direction:column;line-height:1.2;white-space:nowrap;font-weight:600;font-size:14px}
+ #mbk b{font-size:18px;font-weight:800}
+ #mbk small{font-size:13px;opacity:.9}
+ .mobbar .m{min-width:24px}
+ .mdet{white-space:nowrap;font-size:14px}
  .tray{padding:14px 14px calc(14px + env(safe-area-inset-bottom))}
  .tray::before{content:"";display:block;width:40px;height:4px;border-radius:9px;background:var(--line);margin:-4px auto 10px}
  .big b{font-size:42px}
@@ -187,7 +192,7 @@ h2{font-size:20px;margin:26px 0 12px}
 </aside>
 </div>
 <div class="scrim" id="scrim"></div>
-<button class="mobbar" id="mobbar"><span id="mbk">0 / 1500</span><span class="m"><i id="mbi" style="width:0"></i></span><span>დეტალურად ▴</span></button>
+<button class="mobbar" id="mobbar"><span id="mbk">0 / 1500</span><span class="m"><i id="mbi" style="width:0"></i></span><span class="mdet">დეტალურად ▴</span></button>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -232,7 +237,7 @@ function drawTray(){
  $('sums').innerHTML='<span class="b">ცილა '+t.p+'გ</span><span class="b">'+t.u.toFixed(2)+' ₾</span>'+(t.unk?'<span class="b">'+t.unk+' კერძს კალორია არ უწერია</span>':'');
  $('slots').innerHTML=SLOTS.map(([s,l])=>{const rows=tray.map((t,j)=>[t,j]).filter(([t])=>t.s===s);const sk=rows.reduce((a,[t])=>a+(I[t.i]?.k||0),0);
   return '<div class="slot"><h4><span>'+l+'</span><span>'+(rows.length?sk+' კკალ':'')+'</span></h4>'+(rows.length?rows.map(([t,j])=>{const x=I[t.i];if(!x)return'';return '<div class="ti">'+(x.img?'<img src="'+x.img+'" alt="">':'<span class="nimg"></span>')+'<div class="t">'+esc(x.n)+'<small>'+esc(x.v)+' · '+(x.k??'?')+' კკალ · <b>'+x.gel.toFixed(2)+' ₾</b></small><select data-mv="'+j+'" aria-label="გადატანა">'+SLOTS.map(([k,n])=>'<option value="'+k+'"'+(k===s?' selected':'')+'>'+n+'</option>').join('')+'</select></div><button class="x" data-rm="'+j+'" aria-label="წაშლა">×</button></div>'}).join(''):'<div class="empty">ცარიელია</div>')+'</div>'}).join('');
- $('mbk').textContent=t.k+' / '+target+' კკალ · '+t.u.toFixed(2)+' ₾';$('mbi').style.width=pct+'%';
+ $('mbk').innerHTML='<span><b>'+t.k+'</b> / '+target+' კკალ</span><small>'+t.u.toFixed(2)+' ₾</small>';$('mbi').style.width=pct+'%';
  store.set('tray2',tray.map(t=>({key:KEY(I[t.i]),s:t.s})));syncBtns();
 }
 function slotFor(x){if(x.m==='b')return'b';if(x.m==='s')return's';return tray.some(t=>t.s==='l')?'d':'l'}
